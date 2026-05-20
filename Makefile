@@ -2,14 +2,14 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=podman-init
 PKG_VERSION:=1.0.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=Julian Rossbach <contact@juffma.de>
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/podman-containers
+define Package/podman-init
   SECTION:=utils
   CATEGORY:=Utilities
   URL:=https://github.com/Juff-Ma/openwrt-podman-init
