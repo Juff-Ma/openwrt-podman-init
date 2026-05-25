@@ -45,6 +45,9 @@ start_container() {
     config_get privileged "$cfg" privileged 0
     config_get name "$cfg" name "$cfg"
     config_get image "$cfg" image "$cfg"
+
+    config_get delay "$cfg" delay "0"
+    [ "$delay" != "0" ] && sleep "$delay"
  
     config_get dns "$cfg" dns ""
     config_get hostname "$cfg" hostname ""
@@ -52,7 +55,7 @@ start_container() {
     config_get ip "$cfg" ip ""
     config_get memory "$cfg" memory ""
     config_get pid "$cfg" pid ""
-    config_get pull "$cfg" pull "missing"
+    config_get pull "$cfg" pull "try"
     config_get restart "$cfg" restart ""
  
     caps=""
@@ -82,9 +85,11 @@ start_container() {
     [ "$enabled" -eq 0 ] && return 0
  
     logger -t "$NAME" "Starting container $name"
-    logger -t "$NAME" "Pulling latest version for $name - $image"
- 
-    $PROG pull $image  >/dev/null 2>&1 || logger -t "$NAME" "Pulling failed for $image"
+    if [ "$pull" = "try" ]; then
+        logger -t "$NAME" "Pulling latest version for $name - $image"
+
+        $PROG pull $image >/dev/null 2>&1 || logger -t "$NAME" "Pulling failed for $image"
+    fi
  
     # Build the Podman command
     podman_cmd="$PROG run -d"
@@ -94,6 +99,7 @@ start_container() {
     [ -n "$memory" ] && podman_cmd="$podman_cmd --memory $memory"
     [ -n "$pid" ] && podman_cmd="$podman_cmd --pid $pid"
     [ -n "$restart" ] && podman_cmd="$podman_cmd --restart $restart"
+    [ -n "$pull" ] && [ "$pull" != "try" ] && podman_cmd="$podman_cmd --pull $pull"
     [ "$privileged" -eq 1 ] && podman_cmd="$podman_cmd --privileged"
     podman_cmd="$podman_cmd $envs $vols $caps $labels --name $name $image"
  
