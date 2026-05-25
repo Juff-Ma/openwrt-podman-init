@@ -1,6 +1,6 @@
 #!/bin/sh /etc/rc.common
 
-START=91
+START=98
 STOP=9
 USE_PROCD=1
  
@@ -53,6 +53,7 @@ start_container() {
     config_get hostname "$cfg" hostname ""
     config_get image "$cfg" image ""
     config_get ip "$cfg" ip ""
+    config_get ip6 "$cfg" ip6 ""
     config_get memory "$cfg" memory ""
     config_get pid "$cfg" pid ""
     config_get pull "$cfg" pull "try"
@@ -109,6 +110,7 @@ start_container() {
     podman_cmd="$PROG run -d"
     [ -n "$hostname" ] && podman_cmd="$podman_cmd --hostname $hostname"
     [ -n "$ip" ] && podman_cmd="$podman_cmd --ip $ip"
+    [ -n "$ip6" ] && podman_cmd="$podman_cmd --ip6 $ip6"
     [ -n "$memory" ] && podman_cmd="$podman_cmd --memory $memory"
     [ -n "$pid" ] && podman_cmd="$podman_cmd --pid $pid"
     [ -n "$restart" ] && podman_cmd="$podman_cmd --restart $restart"
