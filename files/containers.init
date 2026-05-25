@@ -11,10 +11,15 @@ PROG=/usr/bin/podman
  
 start_service() {
     # At boot time, wait longer for dependencies
-    local max_wait=60
+    local min_wait=15
+    local max_wait=90
     local count=0
+
+    count=$((count + min_wait))
  
-    logger -t "$NAME" "Waiting for system readiness"
+    logger -t "$NAME" "Waiting for system readiness but at least $count seconds"
+
+    sleep $count
  
     # Wait for basic system services
     while [ $count -lt $max_wait ]; do
@@ -55,6 +60,7 @@ start_container() {
     config_get ip "$cfg" ip ""
     config_get ip6 "$cfg" ip6 ""
     config_get memory "$cfg" memory ""
+    config_get softmem "$cfg" softmem ""
     config_get pid "$cfg" pid ""
     config_get pull "$cfg" pull "try"
     config_get restart "$cfg" restart ""
@@ -112,6 +118,7 @@ start_container() {
     [ -n "$ip" ] && podman_cmd="$podman_cmd --ip $ip"
     [ -n "$ip6" ] && podman_cmd="$podman_cmd --ip6 $ip6"
     [ -n "$memory" ] && podman_cmd="$podman_cmd --memory $memory"
+    [ -n "$softmem" ] && podman_cmd="$podman_cmd --memory-reservation $softmem"
     [ -n "$pid" ] && podman_cmd="$podman_cmd --pid $pid"
     [ -n "$restart" ] && podman_cmd="$podman_cmd --restart $restart"
     [ -n "$pull" ] && [ "$pull" != "try" ] && podman_cmd="$podman_cmd --pull $pull"
