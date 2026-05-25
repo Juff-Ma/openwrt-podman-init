@@ -48,6 +48,8 @@ start_container() {
  
     config_get enabled "$cfg" enabled 0
     config_get privileged "$cfg" privileged 0
+    config_get autoremove "$cfg" autoremove 0
+    config_get autoreplace "$cfg" autoreplace 0
     config_get name "$cfg" name "$cfg"
     config_get image "$cfg" image "$cfg"
     config_get platform "$cfg" platform ""
@@ -124,6 +126,8 @@ start_container() {
     [ -n "$pull" ] && [ "$pull" != "try" ] && podman_cmd="$podman_cmd --pull $pull"
     [ -n "$platform" ] && podman_cmd="$podman_cmd --platform $platform"
     [ "$privileged" -eq 1 ] && podman_cmd="$podman_cmd --privileged"
+    [ "$autoremove" -eq 1 ] && podman_cmd="$podman_cmd --rm"
+    [ "$autoreplace" -eq 1 ] && podman_cmd="$podman_cmd --replace"
     [ -n "$cpus" ] && podman_cmd="$podman_cmd --cpus $cpus"
     [ -n "$priority" ] && podman_cmd="$podman_cmd --cpu-shares $priority"
     podman_cmd="$podman_cmd $dns $envs $vols $caps $labels --name $name $image"
