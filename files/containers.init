@@ -45,6 +45,7 @@ start_container() {
     config_get privileged "$cfg" privileged 0
     config_get name "$cfg" name "$cfg"
     config_get image "$cfg" image "$cfg"
+    config_get platform "$cfg" platform ""
 
     config_get delay "$cfg" delay "0"
     [ "$delay" != "0" ] && sleep "$delay"
@@ -84,9 +85,14 @@ start_container() {
  
     [ "$enabled" -eq 0 ] && return 0
  
-    logger -t "$NAME" "Starting container $name"
+    if [ -n "$platform" ]; then
+        logger -t "$NAME" "Starting container $name (platform: $platform)"
+    else
+        logger -t "$NAME" "Starting container $name"
+    fi
+
     if [ "$pull" = "try" ]; then
-        logger -t "$NAME" "Pulling latest version for $name - $image"
+        logger -t "$NAME" "Pulling latest version for $name - $image $platform"
 
         $PROG pull $image >/dev/null 2>&1 || logger -t "$NAME" "Pulling failed for $image"
     fi
@@ -100,6 +106,7 @@ start_container() {
     [ -n "$pid" ] && podman_cmd="$podman_cmd --pid $pid"
     [ -n "$restart" ] && podman_cmd="$podman_cmd --restart $restart"
     [ -n "$pull" ] && [ "$pull" != "try" ] && podman_cmd="$podman_cmd --pull $pull"
+    [ -n "$platform" ] && podman_cmd="$podman_cmd --platform $platform"
     [ "$privileged" -eq 1 ] && podman_cmd="$podman_cmd --privileged"
     podman_cmd="$podman_cmd $envs $vols $caps $labels --name $name $image"
  
