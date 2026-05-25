@@ -50,7 +50,6 @@ start_container() {
     config_get delay "$cfg" delay "0"
     [ "$delay" != "0" ] && sleep "$delay"
  
-    config_get dns "$cfg" dns ""
     config_get hostname "$cfg" hostname ""
     config_get image "$cfg" image ""
     config_get ip "$cfg" ip ""
@@ -58,12 +57,21 @@ start_container() {
     config_get pid "$cfg" pid ""
     config_get pull "$cfg" pull "try"
     config_get restart "$cfg" restart ""
+
+    config_get cpus "$cfg" cpus ""
+    config_get priority "$cfg" priority ""
  
     caps=""
     append_cap() {
         caps="$caps --cap-add=$1"
     }
     config_list_foreach "$cfg" cap append_cap
+
+    dns=""
+    append_dns() {
+        dns="$dns --dns $1"
+    }
+    config_list_foreach "$cfg" dns append_dns
  
     envs=""
     append_env() {
@@ -99,7 +107,6 @@ start_container() {
  
     # Build the Podman command
     podman_cmd="$PROG run -d"
-    [ -n "$dns" ] && podman_cmd="$podman_cmd --dns $dns"
     [ -n "$hostname" ] && podman_cmd="$podman_cmd --hostname $hostname"
     [ -n "$ip" ] && podman_cmd="$podman_cmd --ip $ip"
     [ -n "$memory" ] && podman_cmd="$podman_cmd --memory $memory"
@@ -108,7 +115,9 @@ start_container() {
     [ -n "$pull" ] && [ "$pull" != "try" ] && podman_cmd="$podman_cmd --pull $pull"
     [ -n "$platform" ] && podman_cmd="$podman_cmd --platform $platform"
     [ "$privileged" -eq 1 ] && podman_cmd="$podman_cmd --privileged"
-    podman_cmd="$podman_cmd $envs $vols $caps $labels --name $name $image"
+    [ -n "$cpus" ] && podman_cmd="$podman_cmd --cpus $cpus"
+    [ -n "$priority" ] && podman_cmd="$podman_cmd --cpu-shares $priority"
+    podman_cmd="$podman_cmd $dns $envs $vols $caps $labels --name $name $image"
  
     logger -t "$NAME" "Running '$podman_cmd'"
  
