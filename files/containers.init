@@ -87,6 +87,12 @@ start_container() {
         envs="$envs -e $1"
     }
     config_list_foreach "$cfg" env append_env
+
+    envf=""
+    append_env_file() {
+        envf="$envf --env-file $1"
+    }
+    config_list_foreach "$cfg" env-file append_env_file
  
     vols=""
     append_vol() {
@@ -99,6 +105,12 @@ start_container() {
         labels="$labels -l $1"
     }
     config_list_foreach "$cfg" label append_label
+
+    labelf=""
+    append_label_file() {
+        labelf="$labelf --label-file $1"
+    }
+    config_list_foreach "$cfg" label-file append_label_file
  
     [ "$enabled" -eq 0 ] && return 0
  
@@ -130,7 +142,7 @@ start_container() {
     [ "$autoreplace" -eq 1 ] && podman_cmd="$podman_cmd --replace"
     [ -n "$cpus" ] && podman_cmd="$podman_cmd --cpus $cpus"
     [ -n "$priority" ] && podman_cmd="$podman_cmd --cpu-shares $priority"
-    podman_cmd="$podman_cmd $dns $envs $vols $caps $labels --name $name $image"
+    podman_cmd="$podman_cmd $dns $envs $envf $vols $caps $labels $labelf --name $name $image"
  
     logger -t "$NAME" "Running '$podman_cmd'"
  
