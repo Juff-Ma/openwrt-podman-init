@@ -57,6 +57,7 @@ start_container() {
     config_get delay "$cfg" delay "0"
     [ "$delay" != "0" ] && sleep "$delay"
  
+    config_get user "$cfg" user ""
     config_get hostname "$cfg" hostname ""
     config_get image "$cfg" image ""
     config_get ip "$cfg" ip ""
@@ -129,6 +130,7 @@ start_container() {
     # Build the Podman command
     podman_cmd="$PROG run -d"
     [ -n "$hostname" ] && podman_cmd="$podman_cmd --hostname $hostname"
+    [ -n "$user" ] && podman_cmd="$podman_cmd --user $user"
     [ -n "$ip" ] && podman_cmd="$podman_cmd --ip $ip"
     [ -n "$ip6" ] && podman_cmd="$podman_cmd --ip6 $ip6"
     [ -n "$memory" ] && podman_cmd="$podman_cmd --memory $memory"
